@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📈 AI for the Indian Investor
 ### Avataar.ai × Economic Times Hackathon — Track 6
 
@@ -177,3 +178,7 @@ indian-investor-agent/
 ---
 
 *Built for Avataar.ai × Economic Times Hackathon 2025*
+=======
+# agentic-investor-ai
+Multi-agent AI system for stock market intelligence that detects signals, analyzes context, and generates portfolio-aware investment recommendations.
+>>>>>>> 5a65a00e0c68cdd60ac92b65681a118869bafc40
