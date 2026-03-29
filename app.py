@@ -87,11 +87,11 @@ def parse_portfolio(text: str) -> list[dict]:
     return portfolio
 
 portfolio = parse_portfolio(portfolio_input)
-st.sidebar.success(f"✅ {len(portfolio)} stocks loaded")
+st.sidebar.success(f" {len(portfolio)} stocks loaded")
 
 # ─── Sidebar: Multi-event scenario ───────────────────────────────────────────
 st.sidebar.markdown("---")
-st.sidebar.subheader("📰 Simultaneous Events")
+st.sidebar.subheader(" Simultaneous Events")
 enable_events = st.sidebar.checkbox("Simulate multi-event scenario", value=True)
 
 event_1 = event_2 = None
@@ -111,7 +111,7 @@ if enable_events:
     st.sidebar.info("📡 Event 1: RBI repo rate cut 25bps\n\n📡 Event 2: FMCG regulation change")
 
 # ─── Main area ───────────────────────────────────────────────────────────────
-st.title("📈 AI for the Indian Investor")
+st.title(" AI for the Indian Investor")
 st.markdown("*Multi-agent system: Data Collection → Signal Detection → Analysis → Decision → Personalization*")
 
 col_input, col_run = st.columns([3, 1])
@@ -123,7 +123,7 @@ with col_input:
     ).upper().strip()
 with col_run:
     st.markdown("<br>", unsafe_allow_html=True)
-    run_btn = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
+    run_btn = st.button(" Run Analysis", type="primary", use_container_width=True)
 
 # ─── Run pipeline ────────────────────────────────────────────────────────────
 if run_btn and symbol:
@@ -149,9 +149,11 @@ if "result" in st.session_state:
     result = st.session_state["result"]
     sym    = st.session_state["symbol"]
 
-    rec   = result.get("recommendation", "HOLD")
-    conf  = result.get("confidence", "?")
-    score = result.get("conviction_score", 5)
+    decision = result.get("decision", {})
+
+    rec   = decision.get("recommendation", "HOLD")
+    conf  = decision.get("confidence", "?")
+    score = decision.get("conviction_score", 5)
     price = result.get("price", 0)
     chg   = result.get("price_change", 0)
 
@@ -173,16 +175,16 @@ if "result" in st.session_state:
         f'<div class="big-rec {rec_class}">{emoji} {rec} — {conf} CONFIDENCE ({score}/10)</div>',
         unsafe_allow_html=True,
     )
-    st.markdown(f"**Time horizon:** {result.get('time_horizon','?')}")
+    st.markdown(f"**Time horizon:** {decision.get('time_horizon','?')}")
 
     # ── Price targets ─────────────────────────────────────────────────────────
     t_col1, t_col2, t_col3 = st.columns(3)
     with t_col1:
-        st.info(f"📥 Entry: {result.get('entry_range','N/A')}")
+        st.info(f"📥 Entry: {decision.get('entry_range','N/A')}")
     with t_col2:
-        st.success(f"🎯 Target 1: {result.get('target_1','N/A')}")
+        st.success(f"🎯 Target 1: {decision.get('target_1','N/A')}")
     with t_col3:
-        st.warning(f"🛡 Stop-loss: {result.get('stop_loss','N/A')}")
+        st.warning(f"🛡 Stop-loss: {decision.get('stop_loss','N/A')}")
 
     # ── Alert summary ─────────────────────────────────────────────────────────
     st.markdown("### 📣 Alert Summary")
@@ -194,10 +196,8 @@ if "result" in st.session_state:
     # ── Personalized portfolio alert ──────────────────────────────────────────
     st.markdown("### 👤 Your Portfolio Alert")
     st.markdown(
-        f'<div class="portfolio-alert">{result.get("personalized_alert","")}</div>',
-        unsafe_allow_html=True,
-    )
-
+    f'<div class="portfolio-alert">{result.get("personalized_alert","")}</div>',
+    unsafe_allow_html=True,)
     # ── Multi-event priority ──────────────────────────────────────────────────
     if result.get("multi_event_priority"):
         st.markdown("### 🔀 Multi-Event Prioritization")
@@ -237,17 +237,17 @@ if "result" in st.session_state:
 
     with right:
         st.markdown("### 💡 Reasoning (cited)")
-        if result.get("primary_reason"):
+        if decision.get("primary_reason"):
             st.markdown(f"**Primary:** {result['primary_reason']}")
-        for reason in result.get("supporting_reasons", []):
+        for reason in decision.get("supporting_reasons", []):
             st.markdown(f"• {reason}")
         if result.get("conflicting_signals"):
             st.warning(f"⚡ {result['conflicting_signals']}")
 
     # ── Risk factors ──────────────────────────────────────────────────────────
     st.markdown("### ⚠️ Key Risks")
-    risk_cols = st.columns(len(result.get("key_risks", [])) or 1)
-    for i, risk in enumerate(result.get("key_risks", [])):
+    risk_cols = st.columns(len(decision.get("key_risks", [])) or 1)
+    for i, risk in enumerate(decision.get("key_risks", [])):
         with risk_cols[i]:
             st.error(f"⚠ {risk}")
 

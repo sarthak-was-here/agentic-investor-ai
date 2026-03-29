@@ -14,6 +14,7 @@ import pandas as pd
 import json
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+from urllib.parse import quote
 
 
 # ─── NSE / BSE Free Endpoints ────────────────────────────────────────────────
@@ -41,10 +42,17 @@ def get_stock_data(symbol: str, period: str = "6mo") -> dict:
         ticker_symbol += ".NS"
 
     ticker = yf.Ticker(ticker_symbol)
-    hist   = ticker.history(period=period)
-
-    if hist.empty:
+    try:
+        hist = ticker.history(period=period)
+    except Exception as e:
+        return {"error": f"Failed to fetch data: {str(e)}"}
+    # ✅ CHECK FIRST
+    if hist is None or hist.empty:
         return {"error": f"No data found for {symbol}"}
+
+    # ✅ THEN ACCESS
+    latest = hist.iloc[-1]
+
 
     info = {}
     try:
@@ -78,8 +86,8 @@ def get_stock_data(symbol: str, period: str = "6mo") -> dict:
         "price_change_pct": round(price_change, 2),
         "volume":         int(latest["Volume"]),
         "avg_volume":     info.get("avg_volume"),
-        "volume_ratio":   round(latest["Volume"] / info["avg_volume"], 2)
-                          if info.get("avg_volume") else None,
+        "volume_ratio": round(latest["Volume"] / info["avg_volume"], 2)
+                        if info.get("avg_volume") and info["avg_volume"] != 0 else None,
         "high_52w":       info.get("52w_high"),
         "low_52w":        info.get("52w_low"),
         "info":           info,
@@ -94,7 +102,7 @@ def get_stock_news(symbol: str, company_name: str = "") -> list[dict]:
     Fetch latest news via Google News RSS (completely free, no API key).
     Returns list of {title, link, published, source, summary}.
     """
-    query = company_name if company_name else symbol
+    query = quote(company_name if company_name else symbol)
     # Google News RSS
     url = f"https://news.google.com/rss/search?q={query}+NSE+stock&hl=en-IN&gl=IN&ceid=IN:en"
     feed  = feedparser.parse(url)
